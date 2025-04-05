@@ -1,0 +1,93 @@
+# Binary files
+/whosay
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+/vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build output directories
+/build/
+/bin/
+/dist/
+
+# Environment variables file
+.env
+.env.local
+
+# Configuration files with sensitive information
+config.local.yaml
+config.local.yml
+config.local.json
+
+# Debug files
+debug
+__debug_bin
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# System or application crash dump files
+*.dump
+*.stackdump
+*.core
+
+# Project-specific compiled data
+*.compiled.go
+
+# Auto-generated version info
+version.go
+
+# Cache directories
+.cache/
+
+# Profile output
+*.prof
+*.pprof
+cpu.pprof
+mem.pprof
+trace.out
+
+# Test directories
+**/testdata/
+**/fixtures/
+
+# User-specific configuration files
+.whosayrc
+.whosay.yaml
+.whosay.json

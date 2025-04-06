@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
@@ -22,18 +23,16 @@ func PrintBanner() {
                                                     
 `
 	fmt.Println(TitleColor(banner))
+	fmt.Println()
 }
 
-// PrintTitle prints a decorated section title with more compact design
 func PrintTitle(title string) {
 	width := len(title) + 6
-	// Modern box-style title
 	fmt.Printf("\n %s%s%s\n", BoxTopLeft, strings.Repeat(BoxHorizontal, width), BoxTopRight)
 	fmt.Printf(" %s  %s  %s\n", BoxVertical, TitleColor(title), BoxVertical)
 	fmt.Printf(" %s%s%s\n", BoxBottomLeft, strings.Repeat(BoxHorizontal, width), BoxBottomRight)
 }
 
-// PrintKeyValue prints a key-value pair with nice formatting
 func PrintKeyValue(key string, value interface{}) {
 	fmt.Printf("  %s %s %s\n", 
 		AccentColor(BulletPoint),
@@ -41,7 +40,6 @@ func PrintKeyValue(key string, value interface{}) {
 		ValueColor(fmt.Sprintf("%v", value)))
 }
 
-// PrintCompactKeyValue prints a key-value pair in a shorter format
 func PrintCompactKeyValue(key string, value interface{}, maxKeyWidth int) {
 	keyStr := fmt.Sprintf("%s:", key)
 	padding := maxKeyWidth - len(keyStr) + 1
@@ -56,9 +54,7 @@ func PrintCompactKeyValue(key string, value interface{}, maxKeyWidth int) {
 		ValueColor(fmt.Sprintf("%v", value)))
 }
 
-// PrintUsageBar prints a more compact progress bar for resource usage
 func PrintUsageBar(label string, percentage float64) {
-	// Choose color based on usage percentage
 	var colorFunc func(a ...interface{}) string
 	switch {
 	case percentage < 60:
@@ -71,7 +67,6 @@ func PrintUsageBar(label string, percentage float64) {
 	
 	fmt.Printf("  %s %s: ", AccentColor(BulletPoint), LabelColor(label))
 	
-	// Create and render a more compact progress bar
 	bar := progressbar.NewOptions(100,
 		progressbar.OptionSetWidth(20),
 		progressbar.OptionShowCount(),
@@ -85,14 +80,11 @@ func PrintUsageBar(label string, percentage float64) {
 		}),
 	)
 	
-	// Set the percentage and render
 	bar.Set(int(percentage))
 	fmt.Printf(" %s\n", colorFunc(fmt.Sprintf("%.1f%%", percentage)))
 }
 
-// PrintCompactUsageBar prints a very compact progress bar for resource usage
 func PrintCompactUsageBar(label string, percentage float64, width int) string {
-    // Choose color based on usage percentage
     var colorFunc func(a ...interface{}) string
     
     switch {
@@ -104,13 +96,11 @@ func PrintCompactUsageBar(label string, percentage float64, width int) string {
         colorFunc = DangerColor
     }
     
-    // Create a compact visual bar with consistent width
-    barWidth := width - 9 // Adjusted to ensure percentage fits
+    barWidth := width - 9
     if barWidth < 5 {
         barWidth = 5
     }
     
-    // Ensure percentage is within bounds
     if percentage < 0 {
         percentage = 0
     } else if percentage > 100 {
@@ -124,23 +114,20 @@ func PrintCompactUsageBar(label string, percentage float64, width int) string {
     
     emptyWidth := barWidth - filledWidth
     
-    // Use more modern looking bar characters - solid blocks for better visibility
     bar := colorFunc(strings.Repeat("■", filledWidth)) + DimColor(strings.Repeat("□", emptyWidth))
     
-    // Format percentage with consistent width and add a visual indicator
     return fmt.Sprintf("%s %s", 
         bar,
         colorFunc(fmt.Sprintf("%5.1f%%", percentage)))
 }
 
-// ClearScreen clears the terminal screen
 func ClearScreen() {
 	var cmd *exec.Cmd
 	
 	switch runtime.GOOS {
 	case "windows":
 		cmd = exec.Command("cmd", "/c", "cls")
-	default: // Linux, macOS, etc.
+	default:
 		cmd = exec.Command("clear")
 	}
 	
@@ -148,9 +135,7 @@ func ClearScreen() {
 	_ = cmd.Run()
 }
 
-// GetTerminalWidth tries to determine the width of the terminal
 func GetTerminalWidth() int {
-	// Default to 80 columns if we can't determine
 	defaultWidth := 80
 	
 	cmd := exec.Command("stty", "size")
@@ -169,20 +154,15 @@ func GetTerminalWidth() int {
 	return cols
 }
 
-// RuneDisplayLength calculates the display width of a string accounting for ANSI codes
 func RuneDisplayLength(s string) int {
-    // Strip any potential ANSI color codes
     ansiRegex := regexp.MustCompile("\x1b\\[[0-9;]*m")
     cleanStr := ansiRegex.ReplaceAllString(s, "")
     
     return len(cleanStr)
 }
 
-// FormatValueWithContext adds visual context (colors) to values based on their meaning
 func FormatValueWithContext(key, value string) string {
-    // Color-code usage metrics
     if strings.Contains(key, "Usage") && strings.Contains(value, "%") {
-        // Extract percentage for coloring
         percentStr := strings.TrimSpace(strings.Split(value, " ")[0])
         percent := 0.0
         fmt.Sscanf(percentStr, "%f", &percent)
@@ -196,7 +176,6 @@ func FormatValueWithContext(key, value string) string {
         }
     }
     
-    // Color-code status values
     if key == "Status" {
         if value == "Up" || value == "Running" || value == "Active" || strings.Contains(value, "OK") {
             return SuccessColor(value)
@@ -208,7 +187,6 @@ func FormatValueWithContext(key, value string) string {
     return ValueColor(value)
 }
 
-// GetSectionIcon returns an appropriate icon for a section
 func GetSectionIcon(sectionName string) string {
     switch sectionName {
     case "System", "Runtime Environment", "Runtime":
@@ -224,8 +202,132 @@ func GetSectionIcon(sectionName string) string {
     case "Top Processes", "Processes":
         return "⏺ "
     case "Docker", "Containers":
-        return "🐳" // Docker whale icon
+        return "🐳"
     default:
         return BulletPoint + " "
     }
+}
+
+func isTopLevelSection(sectionName string) bool {
+	topLevelSections := map[string]bool{
+		"System": true,
+		"Runtime Environment": true,
+		"Overview": true,
+	}
+	
+	return topLevelSections[sectionName]
+}
+
+func getSortedSectionNames(sections map[string][][]string) []string {
+	sectionOrder := map[string]int{
+		"System":            1,
+		"Runtime Environment": 2,
+		"CPU":               3,
+		"Memory":            4,
+		"Disk":              5,
+		"Network":           6,
+		"Network Traffic":   7,
+		"Top Processes":     8,
+		"Processes":         9,
+		"Docker":            10,
+		"Containers":        11,
+		"Battery":           12,
+		"Temperature":       13,
+		"System Logs":       14,
+		"Resource History":  15,
+	}
+	
+	names := make([]string, 0, len(sections))
+	for name := range sections {
+		names = append(names, name)
+	}
+	
+	sort.Slice(names, func(i, j int) bool {
+		orderI, existsI := sectionOrder[names[i]]
+		orderJ, existsJ := sectionOrder[names[j]]
+		
+		if !existsI && !existsJ {
+			return names[i] < names[j]
+		} else if !existsI {
+			return false
+		} else if !existsJ {
+			return true
+		}
+		
+		return orderI < orderJ
+	})
+	
+	return names
+}
+
+func CompactDisplay(sections map[string][][]string) {
+	termWidth := GetTerminalWidth()
+	
+	for _, sectionName := range getSortedSectionNames(sections) {
+		data := sections[sectionName]
+		if len(data) == 0 {
+			continue
+		}
+		
+		if !isTopLevelSection(sectionName) { 
+			icon := GetSectionIcon(sectionName)
+			fmt.Printf(" %s%s %s %s\n", 
+				BoxTopLeft, 
+				BoxHorizontal,
+				SectionColor(icon + sectionName),
+				BoxHorizontal)
+			
+			fmt.Printf(" %s%s%s%s%s\n",
+				BoxLeftT,
+				strings.Repeat(ThinBoxHorizontal, termWidth-4),
+				BoxRightT,
+				"",
+				"")
+		} else {
+			fmt.Println()
+		}
+		
+		printSectionData(data, termWidth)
+	}
+}
+
+// Add the printSectionData function that was referenced
+func printSectionData(data [][]string, termWidth int) {
+	if len(data) == 0 {
+		return
+	}
+	
+	maxLabelWidth := 0
+	for _, row := range data {
+		if len(row) >= 2 && len(row[0]) > maxLabelWidth {
+			maxLabelWidth = len(row[0])
+		}
+	}
+	
+	for _, row := range data {
+		if len(row) == 0 {
+			continue
+		}
+		
+		if len(row) == 1 {
+			fmt.Printf("  %s\n", ValueColor(row[0]))
+			continue
+		}
+		
+		label := row[0]
+		value := row[1]
+		
+		if label == "" && value == "" {
+			fmt.Println()
+			continue
+		}
+		
+		if label == "" {
+			fmt.Printf("  %s\n", ValueColor(value))
+		} else {
+			PrintCompactKeyValue(label, value, maxLabelWidth)
+		}
+	}
+	
+	fmt.Println()
 }

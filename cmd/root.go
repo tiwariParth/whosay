@@ -86,6 +86,7 @@ func Execute() {
     if (!*watchFlag) {
         if (!*jsonFlag) {
             ui.PrintBanner()
+            // Remove any other title that might be displayed after the banner
         }
         
         displayInfo(opts, *cpuFlag, *memFlag, *diskFlag, *sysFlag, *netFlag, *netTrafficFlag, *procFlag, 

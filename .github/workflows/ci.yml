@@ -14,7 +14,7 @@ on:
 # Environment variables used across jobs
 env:
   GO_VERSION: '1.20'
-  IMAGE_NAME: tiwariparth/whosay
+  IMAGE_NAME: parthtiwari/whosay
   REGISTRY: docker.io
 
 # A workflow can have multiple jobs that run in parallel

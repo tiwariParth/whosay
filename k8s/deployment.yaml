@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: whosay
-        image: docker.io/tiwariparth/whosay:latest
+        image: docker.io/parthtiwari/whosay:latest
         # This will be automatically updated by the CI pipeline
         resources:
           limits:

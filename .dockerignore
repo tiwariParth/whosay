@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+.github/
+
+# Docker
+docker-publish.sh
+.dockerignore
+
+# Build artifacts
+build/
+bin/
+dist/
+
+# Development tools
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation and other non-build files
+README.md
+LICENSE
+*.md
+
+# Test and temporary files
+*_test.go
+tmp/
+temp/
+*.tmp
+*.test
+*.out
+
+# Log files
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db

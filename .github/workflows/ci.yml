@@ -1,0 +1,149 @@
+name: CI Pipeline
+
+# Defines when the workflow runs
+on:
+  # Triggered on push events to these branches
+  push:
+    branches: [ main, develop ]
+  # Triggered on pull request events to these branches
+  pull_request:
+    branches: [ main, develop ]
+  # Allow manual triggers from the Actions tab
+  workflow_dispatch:
+
+# Environment variables used across jobs
+env:
+  GO_VERSION: '1.20'
+  IMAGE_NAME: tiwariparth/whosay
+  REGISTRY: docker.io
+
+# A workflow can have multiple jobs that run in parallel
+jobs:
+  # First job: Build and test the Go application
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+        # This action checks out your repository so the workflow can access it
+      
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          # This sets up the specified Go version
+          
+      # Step 3: Cache Go modules to speed up subsequent runs
+      - name: Go module cache
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            # Cache key is based on go.sum file hash
+      
+      # Step 4: Download Go dependencies
+      - name: Download dependencies
+        run: go mod download
+        # Downloads all dependencies declared in go.mod
+      
+      # Step 5: Verify dependencies 
+      - name: Verify dependencies
+        run: go mod verify
+        # Verifies that dependencies have not been modified since being downloaded
+      
+      # Step 6: Run static code analysis tools
+      - name: Run go vet
+        run: go vet ./...
+        # Examines Go source code and reports suspicious constructs
+      
+      # Step 7: Run tests with coverage
+      - name: Run tests
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+        # Runs all tests with race detector and generates coverage report
+      
+      # Step 8: Upload coverage report
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.txt
+          # Uploads the coverage report to Codecov for visualization
+      
+      # Step 9: Build binary to ensure compilation works
+      - name: Build
+        run: go build -v ./...
+        # Builds the application to verify it compiles correctly
+
+  # Second job: Build and push Docker image (only on main branch or tags)
+  docker-build-push:
+    name: Build and Push Docker Image
+    needs: build-test
+    runs-on: ubuntu-latest
+    # This job only runs if build-test is successful
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    
+    steps:
+      # Step 1: Check out the repository again for this job
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # Step 2: Set up Docker Buildx for multi-platform builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        # Sets up Docker Buildx for efficient multi-platform image building
+      
+      # Step 3: Login to DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          # Uses stored secrets for authentication
+      
+      # Step 4: Extract metadata for Docker
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=sha,format=short
+          # Creates appropriate tags based on Git references
+      
+      # Step 5: Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          # Builds and pushes the Docker image with the determined tags
+      
+      # Step 6: Update version in deployment manifest for ArgoCD
+      - name: Update version in deployment manifest
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Updating deployment to version: $VERSION"
+          sed -i "s|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION|" ./k8s/deployment.yaml
+          # Updates the Kubernetes manifest with the new version
+      
+      # Step 7: Commit and push updated manifest
+      - name: Commit and push updated manifest
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: './k8s/deployment.yaml'
+          message: 'Update deployment to version ${{ github.ref_name }}'
+          # Commits the updated manifest back to the repository

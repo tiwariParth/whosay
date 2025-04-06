@@ -26,7 +26,7 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-LABEL maintainer="Parth Tiwari <tiwariparth067@gmail.com>"
+LABEL maintainer="Parth Tiwari <parth@example.com>"
 LABEL description="Whosay - A Developer-Friendly System Monitor"
 LABEL version="0.1.0"
 

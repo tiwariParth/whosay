@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whosay
+  labels:
+    app: whosay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whosay
+  template:
+    metadata:
+      labels:
+        app: whosay
+    spec:
+      containers:
+      - name: whosay
+        image: docker.io/tiwariparth/whosay:latest
+        # This will be automatically updated by the CI pipeline
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        # System monitoring requires privileged access
+        securityContext:
+          privileged: true
+        # Command to run (could be modified based on needs)
+        args: ["--all", "--watch"]
+        # Port is provided as example; your app may not expose a port
+        ports:
+        - containerPort: 8080
+          name: http

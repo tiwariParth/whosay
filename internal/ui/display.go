@@ -11,6 +11,19 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
+func PrintBanner() {
+	banner := `
+ __      __.__           _________              __  
+/  \    /  \  |__   ____ /   _____/____  ___.__.\ \ 
+\   \/\/   /  |  \ /  _ \\_____  \\__  \<   |  | | |
+ \        /|   Y  (  <_> )        \/ __ \\___  | | |
+  \__/\  / |___|  /\____/_______  (____  / ____| | |
+       \/       \/              \/     \/\/      /_/
+                                                    
+`
+	fmt.Println(TitleColor(banner))
+}
+
 // PrintTitle prints a decorated section title with more compact design
 func PrintTitle(title string) {
 	width := len(title) + 6

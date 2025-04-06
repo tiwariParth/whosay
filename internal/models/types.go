@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Options defines common options for command execution
 type Options struct {
 	JSONOutput    bool
 	InWatchMode   bool
@@ -11,7 +10,6 @@ type Options struct {
 	EnableAlerts  bool
 }
 
-// SystemInfo represents detailed system information
 type SystemInfo struct {
 	OSName             string `json:"os_name"`
 	OSVersion          string `json:"os_version"`
@@ -26,21 +24,18 @@ type SystemInfo struct {
 	GoVersion          string `json:"go_version"`
 }
 
-// CPUInfo represents CPU information
 type CPUInfo struct {
 	NumCPU       int     `json:"num_cpu"`
 	Usage        float64 `json:"usage_percent"`
 	Architecture string  `json:"architecture"`
 }
 
-// MemoryInfo represents memory information
 type MemoryInfo struct {
 	Total     uint64  `json:"total_bytes"`
 	Used      uint64  `json:"used_bytes"`
 	UsagePerc float64 `json:"usage_percent"`
 }
 
-// DiskInfo represents disk usage information
 type DiskInfo struct {
 	Path       string  `json:"path"`
 	Total      uint64  `json:"total_bytes"`
@@ -48,14 +43,12 @@ type DiskInfo struct {
 	UsagePerc  float64 `json:"usage_percent"`
 }
 
-// NetworkInfo represents the system's network configuration
 type NetworkInfo struct {
 	Interfaces     []NetworkInterface `json:"interfaces"`
 	DefaultGateway string             `json:"default_gateway"`
 	DNSServers     []string           `json:"dns_servers"`
 }
 
-// NetworkInterface contains detailed information about a network interface
 type NetworkInterface struct {
 	Name    string   `json:"name"`
 	IPv4    []string `json:"ipv4_addresses"`
@@ -67,7 +60,6 @@ type NetworkInterface struct {
 	IsWifi  bool     `json:"is_wifi,omitempty"`
 }
 
-// ProcessInfo represents information about a running process
 type ProcessInfo struct {
 	PID         int       `json:"pid"`
 	PPID        int       `json:"parent_pid,omitempty"`
@@ -81,7 +73,6 @@ type ProcessInfo struct {
 	CommandLine string    `json:"command_line,omitempty"`
 }
 
-// ProcessDisplay defines how processes should be sorted and filtered
 type ProcessDisplay struct {
 	SortBy    string
 	Ascending bool
@@ -89,7 +80,6 @@ type ProcessDisplay struct {
 	Limit     int
 }
 
-// ContainerInfo represents information about a running Docker container
 type ContainerInfo struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
@@ -107,7 +97,6 @@ type ContainerInfo struct {
 	MemoryPerc  float64   `json:"memory_percent,omitempty"`
 }
 
-// BatteryInfo represents battery status information
 type BatteryInfo struct {
 	IsPresent      bool    `json:"is_present"`
 	Percentage     float64 `json:"percentage"`
@@ -121,7 +110,6 @@ type BatteryInfo struct {
 	FullCapacity   uint64  `json:"full_capacity_mwh,omitempty"`
 }
 
-// TemperatureInfo represents temperature information
 type TemperatureInfo struct {
 	CPU       float64            `json:"cpu_temp"`
 	GPU       float64            `json:"gpu_temp,omitempty"`
@@ -129,7 +117,6 @@ type TemperatureInfo struct {
 	Units     string             `json:"units"`
 }
 
-// TemperatureHistoryRecord represents a historical temperature record
 type TemperatureHistoryRecord struct {
 	Timestamp  time.Time           `json:"timestamp"`
 	CPU        float64             `json:"cpu_temp"`
@@ -137,7 +124,6 @@ type TemperatureHistoryRecord struct {
 	Components map[string]float64  `json:"components,omitempty"`
 }
 
-// NetworkUsageInfo represents network traffic information
 type NetworkUsageInfo struct {
 	Interface       string    `json:"interface"`
 	BytesReceived   uint64    `json:"bytes_received"`
@@ -150,7 +136,6 @@ type NetworkUsageInfo struct {
 	Timestamp       time.Time `json:"timestamp,omitempty"`
 }
 
-// AlertConfig represents alert settings
 type AlertConfig struct {
 	Enabled        bool    `json:"enabled"`
 	CPUWarning     float64 `json:"cpu_warning_threshold"`
@@ -161,7 +146,6 @@ type AlertConfig struct {
 	DiskCritical   float64 `json:"disk_critical_threshold"`
 }
 
-// AlertLevel defines the severity of an alert
 type AlertLevel int
 
 const (
@@ -170,7 +154,6 @@ const (
 	Critical
 )
 
-// Alert represents a monitoring alert
 type Alert struct {
 	Level       AlertLevel
 	Title       string
@@ -182,7 +165,6 @@ type Alert struct {
 	Acknowledged bool
 }
 
-// LogEntry represents a single log entry
 type LogEntry struct {
 	Timestamp time.Time `json:"timestamp"`
 	Content   string    `json:"content"`

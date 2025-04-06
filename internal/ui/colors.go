@@ -4,9 +4,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// Color functions for consistent styling across the application
 var (
-	// Basic color scheme
 	TitleColor    = color.New(color.FgHiCyan, color.Bold).SprintFunc()
 	SectionColor  = color.New(color.FgHiBlue, color.Bold).SprintFunc()
 	LabelColor    = color.New(color.FgHiYellow).SprintFunc() 
@@ -18,12 +16,10 @@ var (
 	AccentColor   = color.New(color.FgHiMagenta).SprintFunc()
 	DimColor      = color.New(color.FgWhite).SprintFunc()
 	
-	// Special purpose colors
 	HeaderBgColor = color.New(color.BgBlue, color.FgHiWhite).SprintFunc()
 	InfoColor     = color.New(color.FgHiCyan).SprintFunc()
 )
 
-// Constants for box drawing characters to create modern UI elements
 const (
 	BoxHorizontal      = "━"
 	BoxVertical        = "┃"
@@ -40,7 +36,6 @@ const (
 	BulletPoint        = "•"
 	RightArrow         = "→"
 	
-	// Visual indicators
 	CheckMark          = "✓"
 	XMark              = "✗"
 	Warning            = "⚠"

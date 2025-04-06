@@ -14,12 +14,9 @@ import (
 	"github.com/tiwariParth/whosay/internal/ui"
 )
 
-// Execute is the entry point for the CLI application
 func Execute() {
-	// Initialize configuration
 	cfg := config.NewConfig()
 
-	// Define flags
 	cpuFlag := flag.Bool("cpu", false, "Display CPU information")
 	memFlag := flag.Bool("mem", false, "Display memory information")
 	diskFlag := flag.Bool("disk", false, "Display disk information")
@@ -45,18 +42,15 @@ func Execute() {
 	
 	flag.Parse()
 	
-	// Disable color if requested
 	if *noColorFlag {
 		color.NoColor = true
 	}
 
-	// Handle version flag
 	if *versionFlag {
 		fmt.Printf("whosay version %s\n", cfg.Version)
 		os.Exit(0)
 	}
 
-	// Special handling for container logs command
 	if *dockerLogsFlag != "" {
 		opts := models.Options{
 			JSONOutput:    *jsonFlag,
@@ -66,14 +60,12 @@ func Execute() {
 		return
 	}
 
-	// If no specific flags are provided, show help
 	if !(*cpuFlag || *memFlag || *diskFlag || *sysFlag || *netFlag || *netTrafficFlag || *procFlag || 
 	     *dockerFlag || *batteryFlag || *tempFlag || *logsFlag || *historyFlag || *alertsFlag || *allFlag) {
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	// Create options struct for commands
 	opts := models.Options{
 		JSONOutput:    *jsonFlag,
 		InWatchMode:   *watchFlag,
@@ -81,41 +73,38 @@ func Execute() {
 		EnableAlerts:  *alertsFlag,
 	}
 
-	// Watch mode is incompatible with JSON output
 	if *watchFlag && *jsonFlag {
 		fmt.Println("Error: Watch mode is not compatible with JSON output")
 		os.Exit(1)
 	}
 
-	// Ensure refresh rate is at least 1 second
 	refreshRate := *refreshRateFlag
 	if refreshRate < 1 {
 		refreshRate = 1
 	}
 
-    // One-time execution mode
     if (!*watchFlag) {
+        if (!*jsonFlag) {
+            ui.PrintBanner()
+        }
+        
         displayInfo(opts, *cpuFlag, *memFlag, *diskFlag, *sysFlag, *netFlag, *netTrafficFlag, *procFlag, 
                    *dockerFlag, *batteryFlag, *tempFlag, *logsFlag, *historyFlag, *alertsFlag, *allFlag, *jsonFlag, cfg)
         
-        // Show footer only in text mode
-		if !*jsonFlag {
+        if !*jsonFlag {
 			fmt.Println()
 			footerColor := color.New(color.FgHiBlue, color.Italic)
 			footerColor.Println("Thanks for using whosay! Stay resourceful! 🚀")
 		}
 		return
 	} else {
-		// Use the watch mode function
 		runWatchMode(opts, *cpuFlag, *memFlag, *diskFlag, *sysFlag, *netFlag, *netTrafficFlag, *procFlag, 
 		            *dockerFlag, *batteryFlag, *tempFlag, *logsFlag, *historyFlag, *alertsFlag, *allFlag, refreshRate)
 	}
 }
 
-// displayInfo handles displaying the requested system information
 func displayInfo(opts models.Options, cpu, mem, disk, sys, net, netTraffic, proc, docker, battery, temp, logs, history, alerts, all, json bool, cfg *config.Config) {
     if json {
-        // Execute commands individually for JSON output
         if sys || all {
             collectors.GetSystemInfo(opts)
         }
@@ -161,25 +150,20 @@ func displayInfo(opts models.Options, cpu, mem, disk, sys, net, netTraffic, proc
         }
         
         if history || all {
-            // Return usage history
-            fmt.Println("[]") // Simple empty array for now
+            fmt.Println("[]")
         }
         
         if alerts {
-            // Alerts not supported in JSON mode
             fmt.Println("[]")
         }
         
         return
     }
     
-    // Collect all data sections
     allSections := collectDisplaySections(opts, cpu, mem, disk, sys, net, netTraffic, proc, docker, battery, temp, logs, history, alerts, all)
     
-    // Display all sections in a unified compact view
     ui.CompactDisplay(allSections)
     
-    // Show developer-friendly footer only in text mode
     if !json {
         fmt.Println()
         footerText := fmt.Sprintf(" whosay v%s | Use '-watch' for live monitoring | Press Ctrl+C to exit ", cfg.Version)
@@ -188,16 +172,14 @@ func displayInfo(opts models.Options, cpu, mem, disk, sys, net, netTraffic, proc
     }
 }
 
-// runWatchMode is the watch mode execution loop
 func runWatchMode(opts models.Options, cpuFlag, memFlag, diskFlag, sysFlag, netFlag, netTrafficFlag, procFlag, dockerFlag, batteryFlag, tempFlag, logsFlag, historyFlag, alertsFlag, allFlag bool, refreshRate int) {
-    // No intro message to avoid flicker
     for {
         ui.ClearScreen()
         
-        // Just show basic timing info in a simple format - more compact to save space
+        ui.PrintBanner()
+        
         now := time.Now().Format("2006-01-02 15:04:05")
         
-        // Add a colored header bar for watch mode
         width := ui.GetTerminalWidth()
         if width > 120 {
             width = 120
@@ -208,22 +190,17 @@ func runWatchMode(opts models.Options, cpuFlag, memFlag, diskFlag, sysFlag, netF
         fmt.Println(color.New(color.FgHiWhite, color.BgBlue).Sprint(headerText))
         fmt.Println(color.HiBlueString(strings.Repeat("─", width)))
         
-        // In watch mode we need to simplify display
         watchOpts := opts
-        watchOpts.CompactMode = true // Add extra compression for watch mode
+        watchOpts.CompactMode = true
         
-        // Capture the data sections before display
         sections := collectDisplaySections(watchOpts, cpuFlag, memFlag, diskFlag, sysFlag, netFlag, netTrafficFlag, procFlag, dockerFlag, batteryFlag, tempFlag, logsFlag, historyFlag, alertsFlag, allFlag)
         
-        // Display all sections in a unified view
         ui.CompactDisplay(sections)
         
-        // Consistent sleep interval
         time.Sleep(time.Duration(refreshRate) * time.Second)
     }
 }
 
-// collectDisplaySections gathers all the sections to be displayed
 func collectDisplaySections(opts models.Options, cpu, mem, disk, sys, net, netTraffic, proc, docker, battery, temp, logs, history, alerts, all bool) map[string][][]string {
     allSections := make(map[string][][]string)
     
@@ -311,7 +288,6 @@ func collectDisplaySections(opts models.Options, cpu, mem, disk, sys, net, netTr
     }
     
     if history || all {
-        // Create a history section
         historySections := getResourceHistorySections(opts)
         for k, v := range historySections {
             allSections[k] = v
@@ -328,7 +304,6 @@ func collectDisplaySections(opts models.Options, cpu, mem, disk, sys, net, netTr
     return allSections
 }
 
-// getResourceHistorySections creates sections displaying resource usage history
 func getResourceHistorySections(opts models.Options) map[string][][]string {
     result := map[string][][]string{
         "Resource History": {
@@ -337,19 +312,16 @@ func getResourceHistorySections(opts models.Options) map[string][][]string {
         },
     }
     
-    // Add a CPU history graph
-    cpuHistory := []float64{30, 35, 28, 40, 45, 50, 48, 35, 30, 25} // Demo data
+    cpuHistory := []float64{30, 35, 28, 40, 45, 50, 48, 35, 30, 25}
     result["CPU History"] = [][]string{
         {"", ui.RenderLineGraph(cpuHistory, 60, 10, "")},
     }
     
-    // Add a memory history graph
-    memHistory := []float64{50, 55, 58, 60, 65, 70, 65, 62, 60, 55} // Demo data
+    memHistory := []float64{50, 55, 58, 60, 65, 70, 65, 62, 60, 55}
     result["Memory History"] = [][]string{
         {"", ui.RenderLineGraph(memHistory, 60, 10, "")},
     }
     
-    // If temperature history is available, add it
     if len(collectors.GetTemperatureHistory()) > 0 {
         result["Temperature History"] = [][]string{
             {"", collectors.GetTemperatureGraph(60, 10)},

@@ -1,35 +1,29 @@
-# Stage 1: Build the application
+# Build stage
 FROM golang:1.20-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-
+# Copy go.mod first to leverage caching
+COPY go.mod ./
+COPY go.sum ./
 RUN go mod download
 
+# Copy all source code
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o whosay
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o whosay
 
-# stage 2: Create the runtime image
-FROM alpine:3.19
+# Final stage
+FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+WORKDIR /root/
 
-WORKDIR /app
+# Copy the binary from builder
+COPY --from=builder /app/whosay .
 
-COPY --from=builder /app/whosay /app/whosay
-
-RUN chown -R appuser:appgroup /app
-
-USER appuser
-
-LABEL maintainer="Parth Tiwari <parth@example.com>"
-LABEL description="Whosay - A Developer-Friendly System Monitor"
-LABEL version="0.1.0"
-
-ENTRYPOINT ["/app/whosay"]
-
+# Run the binary
+ENTRYPOINT ["./whosay"]
 CMD ["--all"]

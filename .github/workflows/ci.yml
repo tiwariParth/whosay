@@ -117,7 +117,8 @@ jobs:
             echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${GITHUB_REF#refs/tags/},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
           else
             echo "VERSION=latest" >> $GITHUB_ENV
-            echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> $GITHUB_ENV
+            echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          fi
       
       # Step 5: Build and push Docker image
       - name: Build and push Docker image
@@ -135,7 +136,7 @@ jobs:
       # Step 6: Update deployment manifest
       - name: Update deployment manifest
         run: |
-          sed -i "s|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }}|" ./k8s/deployment.yaml
+          sed -i "s|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)|" ./k8s/deployment.yaml
           cat ./k8s/deployment.yaml
           # Updates the Kubernetes manifest with the new version
       
@@ -143,6 +144,6 @@ jobs:
       - name: Commit and push updated manifest
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Update deployment to use image ${{ env.COMMIT_SHA }}"
+          commit_message: "Update deployment to use image $(git rev-parse --short HEAD)"
           file_pattern: "./k8s/deployment.yaml"
           # Commits the updated manifest back to the repository

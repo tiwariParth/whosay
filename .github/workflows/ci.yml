@@ -138,12 +138,12 @@ jobs:
         run: |
           sed -i "s|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)|" ./k8s/deployment.yaml
           cat ./k8s/deployment.yaml
-          # Updates the Kubernetes manifest with the new version
-      
-      # Step 7: Commit and push updated manifest
+
+      # Replace the git-auto-commit-action with a direct git push using the provided token
       - name: Commit and push updated manifest
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Update deployment to use image $(git rev-parse --short HEAD)"
-          file_pattern: "./k8s/deployment.yaml"
-          # Commits the updated manifest back to the repository
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ./k8s/deployment.yaml
+          git commit -m "Update deployment to use image $(git rev-parse --short HEAD)"
+          git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}

@@ -18,6 +18,28 @@ Whosay is a lightweight, easy-to-use system monitoring tool designed specificall
 
 ## Installation
 
+### Flatpak (Linux)
+
+The easiest way to install Whosay on Linux is via Flatpak:
+
+```bash
+# Install from Flathub (once published)
+flatpak install flathub io.github.tiwariParth.whosay
+
+# Run the application
+flatpak run io.github.tiwariParth.whosay
+```
+
+If you've downloaded the .flatpak file:
+
+```bash
+# Install from local file
+flatpak install whosay.flatpak
+
+# Run the application
+flatpak run io.github.tiwariParth.whosay
+```
+
 ### From Source
 
 ```bash

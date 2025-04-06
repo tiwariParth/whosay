@@ -91,3 +91,9 @@ trace.out
 .whosayrc
 .whosay.yaml
 .whosay.json
+
+# Flatpak build artifacts
+/build/
+/repo/
+*.flatpak
+.flatpak-builder/

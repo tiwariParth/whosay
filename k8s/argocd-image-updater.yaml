@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-image-updater-config
+  namespace: argocd
+data:
+  registries.conf: |
+    registries:
+    - name: Docker Hub
+      prefix: docker.io
+      api_url: https://registry-1.docker.io
+      credentials: pull-secret
+      default: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: whosay
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: parthtiwari/whosay:latest
+    argocd-image-updater.argoproj.io/parthtiwari-whosay.update-strategy: digest
+    argocd-image-updater.argoproj.io/write-back-method: git
+spec:
+  # ... existing argocd application spec ...

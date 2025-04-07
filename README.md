@@ -1,8 +1,18 @@
 # Whosay - A Developer-Friendly System Monitor
 
 ![Whosay](https://img.shields.io/badge/version-0.1.0-blue)
+![Go Version](https://img.shields.io/badge/go-1.20-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 Whosay is a lightweight, easy-to-use system monitoring tool designed specifically for developers. It provides real-time insights into your system's resources with a clean, modern terminal interface.
+
+## Screenshots
+
+![Whosay System Monitor Dashboard](docs/images/whosay-dashboard.png)
+*System overview with real-time monitoring of critical resources*
+
+![Whosay Process Monitor](docs/images/whosay-process-monitor.png)
+*Process monitoring with color-coded resource usage*
 
 ## Features
 
@@ -18,29 +28,9 @@ Whosay is a lightweight, easy-to-use system monitoring tool designed specificall
 
 ## Installation
 
-### Flatpak (Linux)
+Whosay can be installed and deployed in multiple ways depending on your needs.
 
-The easiest way to install Whosay on Linux is via Flatpak:
-
-```bash
-# Install from Flathub (once published)
-flatpak install flathub io.github.tiwariParth.whosay
-
-# Run the application
-flatpak run io.github.tiwariParth.whosay
-```
-
-If you've downloaded the .flatpak file:
-
-```bash
-# Install from local file
-flatpak install whosay.flatpak
-
-# Run the application
-flatpak run io.github.tiwariParth.whosay
-```
-
-### From Source
+### Method 1: From Source
 
 ```bash
 # Clone the repository
@@ -56,68 +46,140 @@ go build -o whosay
 sudo mv whosay /usr/local/bin/
 ```
 
+### Method 2: Using Docker
+
+```bash
+# Pull the latest image
+docker pull parthtiwari/whosay:latest
+
+# Run with necessary permissions for system monitoring
+docker run -it --pid=host --net=host --privileged parthtiwari/whosay:latest --all
+```
+
+### Method 3: Kubernetes Deployment
+
+```bash
+# Apply the Kubernetes manifests directly
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+
+# Or deploy with Helm (recommended)
+helm upgrade --install whosay ./helm/whosay -f ./helm/whosay/values-dev.yaml --set createNamespace=true
+```
+
+### Method 4: Using the Helm Chart Helper Script
+
+First, make the script executable and then run it:
+
+```bash
+# Make the script executable
+chmod +x scripts/helm-install.sh
+
+# Run the script to clean existing resources and install with Helm
+./scripts/helm-install.sh
+```
+
 ## Usage
 
 Whosay offers various commands to monitor different aspects of your system:
 
 ```bash
 # Display basic system information
-./whosay -sys
+whosay -sys
 
 # Monitor CPU usage
-./whosay -cpu
+whosay -cpu
 
 # Monitor memory usage
-./whosay -mem
+whosay -mem
 
 # Monitor disk usage
-./whosay -disk
+whosay -disk
 
 # Monitor network information
-./whosay -net
+whosay -net
 
 # Monitor network traffic
-./whosay -nettraffic
+whosay -nettraffic
 
 # View process information
-./whosay -proc
+whosay -proc
 
 # View docker containers
-./whosay -docker
+whosay -docker
 
 # Monitor container logs (specify container name or ID)
-./whosay -container-logs <container-name>
+whosay -container-logs <container-name>
 
 # Display battery status (on laptops)
-./whosay -battery
+whosay -battery
 
 # Monitor temperature sensors
-./whosay -temp
+whosay -temp
 
 # View system logs
-./whosay -logs
+whosay -logs
 
 # Show all information
-./whosay -all
+whosay -all
 
 # Enable continuous monitoring with watch mode
-./whosay -all -watch
+whosay -all -watch
 
 # Set refresh rate for watch mode (in seconds)
-./whosay -all -watch -refresh 2
+whosay -all -watch -refresh 2
 ```
 
 ### Output Options
 
 ```bash
 # Get JSON output instead of text display
-./whosay -cpu -json
+whosay -cpu -json
 
 # Show more detailed information
-./whosay -cpu -verbose
+whosay -cpu -verbose
 
 # Disable colors in output
-./whosay -cpu -no-color
+whosay -cpu -no-color
+```
+
+## DevOps Features
+
+Whosay includes a comprehensive DevOps pipeline for continuous integration, continuous delivery, and deployment:
+
+### 1. Continuous Integration
+
+- **GitHub Actions** automatically builds and tests the application on multiple platforms
+- Run locally with `go test ./...` or view CI status on the GitHub repository
+
+### 2. Continuous Delivery
+
+- Uses Docker for containerization
+- Automatically builds and pushes Docker images to Docker Hub
+- Tagged versions create specific image tags
+
+### 3. Kubernetes Deployment
+
+- Kubernetes manifests in `k8s/` directory
+- Helm charts in `helm/whosay/` directory
+
+### 4. GitOps with ArgoCD
+
+- Automatic deployment to Kubernetes using ArgoCD
+- Syncs with Git repository for declarative configuration
+
+### 5. Helm Chart Deployment
+
+Whosay includes a Helm chart for easy deployment to Kubernetes:
+
+```bash
+# Install with default values
+helm upgrade --install whosay ./helm/whosay --set createNamespace=true
+
+# Install with environment-specific values
+helm upgrade --install whosay ./helm/whosay -f ./helm/whosay/values-dev.yaml --set createNamespace=true
+helm upgrade --install whosay ./helm/whosay -f ./helm/whosay/values-prod.yaml --set createNamespace=true
 ```
 
 ## Example Output
@@ -168,10 +230,10 @@ Monitor your Docker containers without switching tools:
 
 ```bash
 # Get general Docker information
-./whosay -docker
+whosay -docker
 
 # Monitor logs from a specific container
-./whosay -container-logs nginx -logs-limit 50
+whosay -container-logs nginx -logs-limit 50
 ```
 
 ## Advanced Features
@@ -181,7 +243,7 @@ Monitor your Docker containers without switching tools:
 When using watch mode, Whosay can show resource usage over time:
 
 ```bash
-./whosay -cpu -mem -nettraffic -watch
+whosay -cpu -mem -nettraffic -watch
 ```
 
 ### System Temperature Monitoring
@@ -189,7 +251,7 @@ When using watch mode, Whosay can show resource usage over time:
 Keep your system's health in check by monitoring temperatures:
 
 ```bash
-./whosay -temp -watch
+whosay -temp -watch
 ```
 
 ## Compatibility

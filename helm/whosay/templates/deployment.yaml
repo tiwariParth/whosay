@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whosay
+  namespace: whosay
+  labels:
+    {{- include "whosay.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "whosay.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "whosay.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: whosay
+        image: {{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args: {{ .Values.application.args | toJson }}
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 12 }}
+        securityContext:
+          privileged: {{ .Values.deployment.securityContext.privileged }}

@@ -1,0 +1,10 @@
+apiVersion: v2
+name: whosay
+description: A developer-friendly system monitoring tool
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: Parth Tiwari
+    email: parth@example.com
+icon: https://raw.githubusercontent.com/tiwariParth/whosay/main/icons/whosay-256.png

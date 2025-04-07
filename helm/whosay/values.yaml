@@ -1,0 +1,44 @@
+# Default values for Whosay
+
+# Create namespace if it doesn't exist
+createNamespace: false
+
+# Application configuration
+application:
+  # Command line arguments to pass to the application
+  args: ["--all", "--watch"]
+  
+# Deployment configuration
+deployment:
+  # Number of replicas to run
+  replicas: 1
+  
+  # Image settings
+  image:
+    repository: parthtiwari/whosay
+    tag: latest
+    pullPolicy: Always
+  
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  
+  # Security context settings
+  securityContext:
+    privileged: true
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Environment-specific labels
+labels:
+  app: whosay
+  environment: dev

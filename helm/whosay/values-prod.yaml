@@ -1,0 +1,13 @@
+# Values for production environment
+deployment:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+labels:
+  environment: prod

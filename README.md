@@ -2,7 +2,6 @@
 
 ![Whosay](https://img.shields.io/badge/version-0.1.0-blue)
 ![Go Version](https://img.shields.io/badge/go-1.20-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 Whosay is a lightweight, easy-to-use system monitoring tool designed specifically for developers. It provides real-time insights into your system's resources with a clean, modern terminal interface.
 
@@ -266,11 +265,6 @@ Whosay works on:
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests on GitHub.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ---
 
 _"Stay resourceful with Whosay!" 🚀_

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: whosay
-        image: docker.io/parthtiwari/whosay:ff1c7b7
+        image: docker.io/parthtiwari/whosay:9b67ccd
         imagePullPolicy: Always
         resources:
           limits:
